@@ -1,14 +1,13 @@
 # Hunter CS Winter 2019 CodeFest
 
 # Team Info
-### Team name:
+
+### Team name: Phoebe
+
 ### Team members (format: GitHub username, last name, first name):
-- 
-- 
-- 
--
-- 
-- 
+
+- [uzluisf](https://github.com/uzluisf/), Uceta, Luis
+- [ivan-hinson](https://github.com/ivan-hinson), Hinson, Ivan
 
 ### Group info (check all that apply - add an X in the [ ])
 - [ ] We are a CUNY2X bootcamp cohort team
@@ -18,6 +17,7 @@
 - As attendance is highly important, if you checked the above box but only some members will be attending, please indicate the number here: ___
 
 # General Info
+
 ## Theme: Create a Passion Project - Make something you've always wanted to build!
 Think of something you've always wanted to make and bring to life, and do it! To make it easier for our judges and to have some form of organization, all we ask is to try to keep it within one of these categories:
 -   Productivity
@@ -40,6 +40,7 @@ Please incorporate it into your project, and we hope to see new, exciting, and i
 8. Good luck and have fun!
 
 ## Important dates:
+
 - Start date: Monday, December 23rd, 2019
 - Submission deadline: Monday, January 27, 2020 at 7:00am
 - Final event date: Friday, January 31, 2020 (time TBD) at Google NYC (on the corner of 15th Street and 8th Ave in Manhattan, more details to follow)
