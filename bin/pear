@@ -1,0 +1,5 @@
+use Pear;
+
+my Pear $app .= new;
+
+say $app.name;
