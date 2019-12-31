@@ -1,4 +1,5 @@
 use Pear::Utils;
+use Pear::Template;
 
 unit class Pear;
 
@@ -13,12 +14,21 @@ has $.config   is required;
 # private attributes
 ########################################
 
+has @!pages;
 has @!posts;
 has %!tags;
+has $!template;
 
 ########################################
 # public methods
 ########################################
+
+submethod TWEAK() {
+    $!template = Template.new(
+        templates-dir => $!config.templates-dir,
+        include-dir => $!config.include-dir
+    );
+}
 
 method parse-metadata {
 
@@ -78,10 +88,38 @@ method parse-metadata {
 
 method generate-posts {
     for @!posts -> $post {
-        my $html = $post<raw>;
+        my $html = $!template.render-page($post, $!config.settings);
         my $post-url = $!config.output-dir.IO.add($!config.posts-dir)
                 .add($post<url>.substr(1, *)).resolve;
         my $post-file = $post-url.add('index.html');
+        self!write-html($post-file, $html);
+    }
+}
+
+#| Generate whatever pages inside content except posts.
+method collect-pages {
+    for dir($!config.content-dir) -> $page {
+        next if $page.IO.d;
+
+        next if $page.basename.starts-with('.');
+
+        my %page-meta = Pear::Utils::get-metadata($page);
+        # post's url under post's directory
+        %page-meta<url> = '/' ~ %page-meta<filename>.IO.basename.split('.', *).first;
+        @!pages.push(%page-meta);
+    }
+}
+
+method generate-pages {
+    for @!pages -> $page {
+        my $html = $!template.render-page($page, $!config.settings);
+        my $post-file;
+        if $page<url>.contains('index') {
+            $post-file = $!config.output-dir.IO.add($page<url> ~ '.html');
+        }
+        else {
+            $post-file = $!config.output-dir.IO.add($page<url>).add('index.html');
+        }
 
         self!write-html($post-file, $html);
     }
