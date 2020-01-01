@@ -1,5 +1,34 @@
 use Pear;
-
-my Pear $app .= new;
-
-say $app.name;
+use Pear::Config;
+ 
+=comment APP SETUP
+ 
+# Allow that named arguments appear after positional ones.
+# See: https://docs.raku.org/language/create-cli#%*SUB-MAIN-OPTS
+my %*SUB-MAIN-OPTS = :named-anywhere;
+ 
+# Set up the directory and the configuration file.
+my $work-dir = $*CWD.absolute;
+my $config   = Pear::Config.get-config($work-dir);
+ 
+# Set up the application.
+my $app = Pear.new(:$work-dir, :$config);
+ 
+=comment CLI OPTIONS
+ 
+#| Render the site.
+multi MAIN(
+    'render',
+    :$skip-pages   = False, #= Skip pages generation (Default = False).
+    :$skip-blog    = False, #= Skip blog generation (Default = False).
+) {
+    ...
+}
+ 
+#| Start local web server.
+multi MAIN(
+    'serve',
+    Int:D :p(:$port) = 3000, #= Port in which the server should run. (Default = 3000)
+) {
+    ...
+}
