@@ -11,7 +11,6 @@ directories:
 YAML
 
 has $.content-dir;
-has $.posts-dir;
 has $.templates-dir;
 has $.include-dir;
 has $.output-dir;
@@ -32,19 +31,14 @@ method get-config( ::?CLASS:U: $working-dir, $config-name = 'config.yaml' ) {
 
     my %config = load-yaml($config-file.slurp);
 
-    my $cd = $working-dir.IO.add(%config<directories><content>);
-    my $pd = $working-dir.IO.add(%config<directories><posts>);
-    my $td = $working-dir.IO.add(%config<directories><templates>);
-    my $id = $working-dir.IO.add(%config<directories><include>);
-    my $od = $working-dir.IO.add(%config<directories><output>);
-    my $s  = %config.grep(*.key ne 'directories');
+    given $working-dir {
+        return self.new:
+            content-dir   => $_.IO.add(%config<directories><content>),
+            templates-dir => $_.IO.add(%config<directories><templates>),
+            include-dir   => $_.IO.add(%config<directories><include>),
+            output-dir    => $_.IO.add(%config<directories><output>),
+            settings      => %config.grep(*.key ne 'directories');
+        ;
+    }
 
-    return self.new:
-        content-dir => $cd,
-        posts-dir => $pd,
-        templates-dir => $td,
-        include-dir => $id,
-        output-dir => $od,
-        settings => $s
-    ;
 }

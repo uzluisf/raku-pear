@@ -23,16 +23,52 @@ has $!template;
 # public methods
 ########################################
 
-submethod TWEAK() {
+submethod TWEAK {
     $!template = Template.new(
-        templates-dir => $!config.templates-dir,
-        include-dir => $!config.include-dir
+        :templates-dir($!config.templates-dir), :include-dir($!config.include-dir)
     );
+
+    self!collect-pages();
+    self!collect-posts();
 }
 
-method parse-metadata {
+method generate-posts {
+    self!collect-posts();
 
-    for dir($!config.posts-dir) -> $post {
+    my $post-dir = $!config.content-dir.add('posts');
+    for @!posts -> $post {
+        my $html = $!template.render-page($post, $!config.settings);
+        my $post-url = $!config.output-dir.IO.add($post-dir)
+                .add($post<url>.substr(1, *)).resolve;
+        my $post-file = $post-url.add('index.html');
+        self!write-html($post-file, $html);
+    }
+}
+
+method generate-pages {
+    self!collect-pages();
+
+    for @!pages -> $page {
+        my $html = $!template.render-page($page, $!config.settings);
+        my $post-file;
+        if $page<url>.contains('index') {
+            $post-file = $!config.output-dir.IO.add($page<url> ~ '.html');
+        }
+        else {
+            $post-file = $!config.output-dir.IO.add($page<url>).add('index.html');
+        }
+
+        self!write-html($post-file, $html);
+    }
+}
+
+########################################
+# private methods
+########################################
+
+method !collect-posts {
+    my $post-dir = $!config.content-dir.add('posts');
+    for dir($post-dir) -> $post {
         next if $post.basename.starts-with('.');
 
         my %post-meta    = Pear::Utils::get-metadata($post);
@@ -40,8 +76,8 @@ method parse-metadata {
 
         # post's url under post's directory
         %post-meta<url> = ('/' ~ %post-meta<date>.Str).IO.add(
-            %post-meta<filename>.IO.basename.split('.', *).first
-        ).Str;
+                %post-meta<filename>.IO.basename.split('.', *).first
+                ).Str;
 
         @!posts.push(%post-meta);
 
@@ -83,21 +119,9 @@ method parse-metadata {
     }
 
     # TODO: pagination
-
 }
 
-method generate-posts {
-    for @!posts -> $post {
-        my $html = $!template.render-page($post, $!config.settings);
-        my $post-url = $!config.output-dir.IO.add($!config.posts-dir)
-                .add($post<url>.substr(1, *)).resolve;
-        my $post-file = $post-url.add('index.html');
-        self!write-html($post-file, $html);
-    }
-}
-
-#| Generate whatever pages inside content except posts.
-method collect-pages {
+method !collect-pages {
     for dir($!config.content-dir) -> $page {
         next if $page.IO.d;
 
@@ -109,25 +133,6 @@ method collect-pages {
         @!pages.push(%page-meta);
     }
 }
-
-method generate-pages {
-    for @!pages -> $page {
-        my $html = $!template.render-page($page, $!config.settings);
-        my $post-file;
-        if $page<url>.contains('index') {
-            $post-file = $!config.output-dir.IO.add($page<url> ~ '.html');
-        }
-        else {
-            $post-file = $!config.output-dir.IO.add($page<url>).add('index.html');
-        }
-
-        self!write-html($post-file, $html);
-    }
-}
-
-########################################
-# private methods
-########################################
 
 method !write-html( $post-file, $html ) {
     try mkdir $post-file.dirname;
