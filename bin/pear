@@ -21,11 +21,12 @@ multi MAIN(
     'render',
     Bool:D :$skip-pages = False, #= Skip pages generation. (Default = False)
     Bool:D :$skip-blog  = False, #= Skip blog generation. (Default = False)
+    Bool:D :$skip-tags  = False, #= Skip tags generation. (Default = False)
 ) {
     given $app {
         .generate-posts if !$skip-blog;
-
         .generate-pages if !$skip-pages;
+        .generate-tags  if !$skip-tags;
     }
 }
  

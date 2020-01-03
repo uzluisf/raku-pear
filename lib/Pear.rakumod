@@ -1,5 +1,6 @@
 use Pear::Utils;
 use Pear::Template;
+use Pear::Paginator;
 
 unit class Pear;
 
@@ -19,6 +20,8 @@ has @!posts;
 has %!tags;
 has $!template;
 
+has %!include;
+
 ########################################
 # public methods
 ########################################
@@ -28,16 +31,17 @@ submethod TWEAK {
         :templates-dir($!config.templates-dir), :include-dir($!config.include-dir)
     );
 
-    self!collect-pages();
-    self!collect-posts();
+    self!copy-to-site($!config.include-dir);
 }
 
 method generate-posts {
+    # we must collect posts before generating them.
     self!collect-posts();
 
-    my $post-dir = $!config.content-dir.add('posts');
+    # now let's generate the posts.
+    my $post-dir = 'posts';
     for @!posts -> $post {
-        my $html = $!template.render-page($post, $!config.settings);
+        my $html = $!template.render-page($post);
         my $post-url = $!config.output-dir.IO.add($post-dir)
                 .add($post<url>.substr(1, *)).resolve;
         my $post-file = $post-url.add('index.html');
@@ -46,19 +50,33 @@ method generate-posts {
 }
 
 method generate-pages {
+    # we must collect pages before generating them.
     self!collect-pages();
 
+    # now let's generate the posts.
     for @!pages -> $page {
-        my $html = $!template.render-page($page, $!config.settings);
-        my $post-file;
-        if $page<url>.contains('index') {
-            $post-file = $!config.output-dir.IO.add($page<url> ~ '.html');
-        }
-        else {
-            $post-file = $!config.output-dir.IO.add($page<url>).add('index.html');
-        }
+        my $html = $!template.render-page($page);
+        my $post-file = $page<url>.contains('index')
+            ?? $!config.output-dir.IO.add($page<url> ~ '.html')
+            !! $!config.output-dir.IO.add($page<url>).add('index.html');
 
+        # create the HTML page.
         self!write-html($post-file, $html);
+    }
+}
+
+#| Generate tag pages.
+method generate-tags {
+    for %!tags -> $tag-to-posts {
+        my $name   = $tag-to-posts.key.lc; # get tag's name.
+        my @posts := $tag-to-posts.value;  # get posts with given tag.
+        my %page-meta = template => 'tag', tag => %(:$name, :@posts);
+        my $html      = $!template.render-page(%page-meta);
+
+        my $tag-page-url = $!config.output-dir.IO.add('tag').add($name);
+        my $tag-file = $tag-page-url.IO.add('index.html');
+        # create the HTML page.
+        self!write-html($tag-file, $html);
     }
 }
 
@@ -76,8 +94,8 @@ method !collect-posts {
 
         # post's url under post's directory
         %post-meta<url> = ('/' ~ %post-meta<date>.Str).IO.add(
-                %post-meta<filename>.IO.basename.split('.', *).first
-                ).Str;
+            %post-meta<filename>.IO.basename.split('.', *).first
+        ).Str;
 
         @!posts.push(%post-meta);
 
@@ -86,7 +104,7 @@ method !collect-posts {
             for %post-meta<tags>.flat -> $tag {
                 # associate current post with tag. Either the tag already
                 # exists or a new tag entry will be added to the hash of tags.
-                %!tags{$tag}.push(%post-meta)
+                %!tags{$tag.lc}.push(%post-meta)
             }
         }
     }
@@ -96,7 +114,7 @@ method !collect-posts {
 
     # sort tags based on date (ascending order).
     for %!tags.keys -> $tag {
-        %!tags{$tag} .= sort(-> $post { $post<date> })
+        %!tags{$tag} = %!tags{$tag}.sort(-> $post { $post<date> }).Array
     }
 
     # include post's tags. Also include previous and next urls for a given post.
@@ -105,7 +123,7 @@ method !collect-posts {
 
         if $post<tags> {
             for $post<tags>.flat -> $name is rw {
-                my $url = '/tag'.IO.add($name).Str;
+                my $url = '/tag'.IO.add($name.lc).Str;
                 @post-tags.push(%(:$name, :$url, :posts(%!tags{$name})));
             }
         }
@@ -118,7 +136,19 @@ method !collect-posts {
         $post<next>     = $next >= 0 ?? @!posts[$next] !! Nil;
     }
 
-    # TODO: pagination
+    # collect tags made available to the templates.
+    my @tags;
+    for %!tags.keys -> $name {
+        my $url = '/tag'.IO.add($name.lc).Str;
+        @tags.push(:$name, :$url, :posts(%!tags{$name}));
+    }
+
+    # collect site's settings made available to the templates.
+    my %site = %(time => DateTime.now, $!config.include-dir.basename.Str => %!include);
+    %site    = %site, |$!config.settings;
+
+    # update global variables for the templates.
+    $!template.update-globals(:@!posts, :@gtags, :%site);
 }
 
 method !collect-pages {
@@ -137,4 +167,24 @@ method !collect-pages {
 method !write-html( $post-file, $html ) {
     try mkdir $post-file.dirname;
     $post-file.spurt($html);
+}
+
+method !copy-to-site( $dir ) {
+    # TODO: This method needs some cleanup.
+    my %dir-to-files = Pear::Utils::walk($!config.include-dir);
+
+    for %dir-to-files.keys -> $dirname {
+        for %dir-to-files{$dirname}.flat -> $file {
+
+            %!include{$dirname.IO.basename}.push(
+                $!config.include-dir.basename.IO.add($dirname.IO.basename).add($file).Str
+            );
+
+            my $from = $dirname.IO.add($file);
+            my $to-dirname = $!config.output-dir.IO.add($dirname);
+            mkdir $to-dirname;
+            my $to = $to-dirname.add($file).resolve;
+            copy $from, $to;
+        }
+    }
 }

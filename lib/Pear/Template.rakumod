@@ -4,7 +4,9 @@ unit class Pear::Template;
 
 has $.templates-dir; # directory where templates are located
 has $.include-dir;   # directory where assets are located
+
 has %!templates;     # template's name to template's location hash
+has %!globals;       # global variables made available to a template
 
 ########################################
 # public methods
@@ -14,7 +16,7 @@ submethod TWEAK() {
     self!load-templates;
 }
 
-method render-page( %page, $site ) {
+method render-page( %page ) {
 
     # make sure each page specifies a template (index, blog, etc.).
     if %page<template>:!exists {
@@ -37,17 +39,32 @@ method render-page( %page, $site ) {
     # get partials
     my %partials = self!get-partials;
 
-    my %context = %(
-        :%page,
-        #:$posts,
-        #:$settings,
-    );
+    =begin comment
+    Context make the following variables available to a template:
+        * site, user defined variables from the YAML file. Thus, anything that
+          isn't under 'directories'.
+        * page, content specific to the current page.
+        * posts, a list of all the posts.
+        * tags, a list of tags.
+    =end comment
+    my %context = :%page, |%!globals;
+
+    # make the global variable 'tag' to the template 'tag'.
+    if %page<template> eq 'tag' {
+        %context<tag> = %page<tag>;
+    }
 
     return self!render-template:
         :%context,
         :content($template.IO.slurp),
         :from[%partials]
     ;
+}
+
+method update-globals( *%global-vars ) {
+    for %global-vars.keys -> $var {
+        %!globals{$var} = %global-vars{$var};
+    }
 }
 
 ########################################
