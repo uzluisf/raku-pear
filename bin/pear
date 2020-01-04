@@ -29,11 +29,41 @@ multi MAIN(
         .generate-tags  if !$skip-tags;
     }
 }
- 
+
 #| Start local web server.
 multi MAIN(
     'serve',
     Int:D :p(:$port) = 3000, #= Port in which the server should run. (Default = 3000)
 ) {
-    ...
+    my $build-dir = $config.output-dir;
+    my $server = Pear::Preview::HTTP.new(
+        :$build-dir, :$port, :host('localhost'), :!no-livereload, :!omit-html-ext,
+    );
+
+    await $server.webserver();
+}
+
+#| Start local web server and re-render site on content/template modification.
+multi MAIN(
+    'watch',
+    Int:D :p(:$port) = 3000,       #= Port in which the server should run. (Default = 3000)
+    Bool:D :$no-livereload = False #= Disable livereload when running pear watch. (Default = False)
+) {
+    class Writer {
+        has $.app;
+
+        method write {
+            given $!app {
+                .generate-posts;
+                .generate-pages;
+            }
+        }
+    }
+
+    my $writer  = Writer.new(:$app);
+    my $watcher = Pear::Preview.new(
+        :$writer, :$config, :$port, :host('localhost'), :$no-livereload
+    );
+
+    $watcher.watch()
 }
