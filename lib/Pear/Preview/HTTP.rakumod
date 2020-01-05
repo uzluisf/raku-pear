@@ -30,17 +30,17 @@ method webserver( --> Array ) {
                 }
             
                 # If $reload is True, return a JSON doc instructing
-                # uzu/js/live.js to reload the browser.
+                # pear/js/live.js to reload the browser.
                 when '/live' {
                     return 200, [$!ct-json], ['{ "reload": "True" }'] if $reload.poll;
                     return 200, [$!ct-json], ['{ "reload": "False" }'];
                 }
             
                 # Include live.js that starts polling /live for reload instructions
-                when '/uzu/js/live.js' {
-                    put "GET /uzu/js/live.js";
+                when '/pear/js/live.js' {
+                    put "GET /pear/js/live.js";
                     my Str $livejs = q:to|END|; 
-                    // Uzu live-reload
+                    // Pear live-reload
                     function live() {
                         var xhttp = new XMLHttpRequest();
                         xhttp.onreadystatechange = function() {
@@ -113,7 +113,7 @@ method webserver( --> Array ) {
                         }
                     }    
                 }
-                put "uzu serves [http://localhost:{$!port}]";
+                put "pear serves [http://localhost:{$!port}]";
             }
         }
         # END http server
@@ -129,7 +129,7 @@ method process-livereload( Str :$content, Bool :$no-livereload --> Str ) {
     return '' when !$content.defined;
     unless $no-livereload {
         # Add livejs if live-reload enabled (default)
-        my Str $livejs = '<script src="/uzu/js/live.js"></script>';
+        my Str $livejs = '<script src="/pear/js/live.js"></script>';
         if $content ~~ /'</body>'/ {
             return S/'</body>'/$livejs\n<\/body>/ given $content;
         } else {

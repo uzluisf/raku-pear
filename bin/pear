@@ -8,29 +8,38 @@ use Pear::Config;
 my %*SUB-MAIN-OPTS = :named-anywhere;
  
 # Set up the directory and the configuration file.
-my $work-dir = $*CWD.absolute;
-my $config   = Pear::Config.get-config($work-dir);
- 
+my $working-dir = $*CWD.absolute;
+my $config      = Pear::Config.new(:$working-dir);
+
 # Set up the application.
-my $app = Pear.new(:$work-dir, :$config);
+my $app = Pear.new(:$working-dir, :$config);
  
 =comment CLI OPTIONS
  
 #| Render the site.
 multi MAIN(
     'render',
-    Bool:D :$skip-pages = False, #= Skip pages generation. (Default = False)
-    Bool:D :$skip-blog  = False, #= Skip blog generation. (Default = False)
-    Bool:D :$skip-tags  = False, #= Skip tags generation. (Default = False)
+    Bool:D :$skip-pages  = False,         #= Skip pages generation. (Default = False)
+    Bool:D :$skip-blog   = False,         #= Skip blog generation. (Default = False)
+    Bool:D :$skip-tags   = False,         #= Skip tags generation. (Default = False)
+    Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
 ) {
+
+    # update configuration file.
+    if $config-name ne 'config.yaml' {
+        $app.config.config-name = $config-name;
+        $app.config.load-config();
+    }
+
     given $app {
         .generate-posts if !$skip-blog;
         .generate-pages if !$skip-pages;
+         # tags are collected from posts so tags must be generated after posts.
         .generate-tags  if !$skip-tags;
     }
 }
 
-#| Start local web server.
+#| Start local web server and serve rendered site.
 multi MAIN(
     'serve',
     Int:D :p(:$port) = 3000, #= Port in which the server should run. (Default = 3000)
@@ -46,9 +55,13 @@ multi MAIN(
 #| Start local web server and re-render site on content/template modification.
 multi MAIN(
     'watch',
-    Int:D :p(:$port) = 3000,       #= Port in which the server should run. (Default = 3000)
-    Bool:D :$no-livereload = False #= Disable livereload when running pear watch. (Default = False)
+    Int:D :p(:$port) = 3000,              #= Port in which the server should run. (Default = 3000)
+    Bool:D :$no-livereload = False,       #= Disable livereload when running pear watch. (Default = False)
+    Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
 ) {
+    # This could've been an anonymous class but for the sake of clarity,
+    # we're giving it a name. The watcher call the method 'write' on its
+    # attribute 'writer'.
     class Writer {
         has $.app;
 
@@ -56,8 +69,15 @@ multi MAIN(
             given $!app {
                 .generate-posts;
                 .generate-pages;
+                .generate-tags;
             }
         }
+    }
+
+    # update configuration file.
+    if $config-name ne 'config.yaml' {
+        $app.config.config-name = $config-name;
+        $app.config.load-config();
     }
 
     my $writer  = Writer.new(:$app);
