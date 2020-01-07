@@ -10,7 +10,7 @@ my regex post {
     $<body> = (.*)
 }
 
-our sub get-metadata( $filename ) {
+our sub get-metadata( IO::Path $filename --> Hash ) {
     my $content = $filename.slurp;
     my (%meta, $body);
 
@@ -25,7 +25,7 @@ our sub get-metadata( $filename ) {
         %meta<raw> = $content;
     }
 
-    %meta<filename> = $filename.Str;
+    %meta<filename> = $filename.basename;
     return %meta;
 }
 

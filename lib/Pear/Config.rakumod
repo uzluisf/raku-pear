@@ -26,6 +26,9 @@ that stores images, CSS, JS, etc. 'static'. In the config file, this
 is just 'include: static'.
 =end comment
 has $!default-config = q:to/YAML/;
+base-url: /
+date-format: 'yyyy-mm-dd'
+
 directories:
   templates: templates
   include: include

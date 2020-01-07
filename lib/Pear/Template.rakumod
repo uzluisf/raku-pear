@@ -43,13 +43,15 @@ method render-page( %page ) {
     Context make the following variables available to a template:
         * site, user defined variables from the YAML file. Thus, anything that
           isn't under 'directories'.
-        * page, content specific to the current page.
+        * page, content specific to the current page. Outside of `posts`,
+        a post is just another page so `page.title` to access the post's title
+        for instance.
         * posts, a list of all the posts.
         * tags, a list of tags.
     =end comment
     my %context = :%page, |%!globals;
 
-    # make the global variable 'tag' to the template 'tag'.
+    # make the global variable 'tag' only to the template 'tag'.
     if %page<template> eq 'tag' {
         %context<tag> = %page<tag>;
     }
@@ -88,8 +90,14 @@ method !render-template( :%context, Str :$content, :@from --> Str:D ) {
 
 method !load-templates {
     my $ext = 'mustache';
-    for dir($!templates-dir) -> $template {
-        my $template-name = $template.basename.Str.subst(/\.$ext/, '');
-        %!templates{$template-name} = $template.absolute;
+    if $!templates-dir ~~ :e && $!templates-dir ~~ :d {
+        for dir($!templates-dir) -> $template {
+            my $template-name = $template.basename.Str.subst(/\.$ext/, '');
+            %!templates{$template-name} = $template.absolute;
+        }
+    }
+    else {
+        say "No such '$!templates-dir' directory";
+        exit;
     }
 }

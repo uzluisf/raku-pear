@@ -9,10 +9,22 @@
     "source-url" : "https://github.com/hunter-classes/winter-2020-codefest-submissions-phoebe.git",
     "provides" : { 
         "pear" : "bin/pear",
-        "Pear" : "lib/Pear.rakumod"
+        "Pear" : "lib/Pear.rakumod",
+        "Pear::Config" : "lib/Pear/Config.rakumod",
+        "Pear::Template" : "lib/Pear/Template.rakumod",
+        "Pear::Utils" : "lib/Pear/Utils.rakumod",
+        "Pear::Preview" : "lib/Pear/Preview.rakumod",
+        "Pear::Preview::HTTP" : "lib/Pear/Preview/HTTP.rakumod",
+        "Pear::Preview::Watch" : "lib/Pear/Preview/Watch.rakumod"
     },
     "resources" : [],
-    "depends" : [],
+    "depends" : [
+        "YAMLish",
+        "Text::Markdown",
+        "Template::Mustache",
+        "File::Find",
+        "HTTP::Server::Tiny"
+    ],
     "build-depends" : [],
     "test-depends" : [] 
 }
