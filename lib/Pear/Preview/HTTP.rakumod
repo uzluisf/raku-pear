@@ -1,4 +1,5 @@
 use HTTP::Server::Tiny:ver<0.0.2>;
+use Log;
 
 unit class Pear::Preview::HTTP;
 
@@ -10,6 +11,8 @@ has Bool $.omit-html-ext;
 
 has Pair $!ct-json = 'Content-Type' => 'application/json';
 has Pair $!ct-text = 'Content-Type' => 'text/plain';
+
+has Log $!log .= new;
 
 method webserver( --> Array ) {
     my Promise @servers;
@@ -25,7 +28,7 @@ method webserver( --> Array ) {
                 # Routes
                 when  '/reload' {
                     $reload.send(True);
-                    put "GET /reload";
+                    $!log.info('Get /reload');
                     return 200, [$!ct-json], ['{ "reload": "Staged" }'];
                 }
             
@@ -38,7 +41,7 @@ method webserver( --> Array ) {
             
                 # Include live.js that starts polling /live for reload instructions
                 when '/pear/js/live.js' {
-                    put "GET /pear/js/live.js";
+                    $!log.info('Get /pear/js/live.js');
                     my Str $livejs = q:to|END|; 
                     // Pear live-reload
                     function live() {
@@ -88,15 +91,15 @@ method webserver( --> Array ) {
                     
                         when !*.IO.e {
                             # Invalid path
-                            put "GET $file (not found)";
+                            $!log.warn("GET $file (not found)");
                             return 400, [$!ct-text], ['Invalid path'];
                         }
             
                         default {
                             # Return any valid paths
                             my %ct = self!detect-content-type($path);
-            
-                            put "GET $file";
+
+                            $!log.info("GET $file");
             
                             # HTML
                             if %ct<type> ~~ 'text/html;charset=UTF-8' {
@@ -113,7 +116,7 @@ method webserver( --> Array ) {
                         }
                     }    
                 }
-                put "pear serves [http://localhost:{$!port}]";
+                $!log.info("Pear serves [http://localhost:{$!port}]");
             }
         }
         # END http server

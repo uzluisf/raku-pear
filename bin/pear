@@ -1,5 +1,6 @@
 use Pear;
 use Pear::Config;
+use Log;
  
 =comment APP SETUP
  
@@ -8,12 +9,14 @@ use Pear::Config;
 my %*SUB-MAIN-OPTS = :named-anywhere;
  
 # Set up the directory and the configuration file.
-my $working-dir = $*CWD.absolute;
+my $working-dir = $*CWD.absolute.IO;
 my $config      = Pear::Config.new(:$working-dir);
 
 # Set up the application.
 my $app = Pear.new(:$working-dir, :$config);
- 
+
+my Log $log .= new;
+
 =comment CLI OPTIONS
  
 #| Render the site.
@@ -37,6 +40,8 @@ multi MAIN(
          # tags are collected from posts so tags must be generated after posts.
         .generate-tags  if !$skip-tags;
     }
+
+    $log.info("Site rendered at '{$config.output-dir.basename}'");
 }
 
 #| Start local web server and serve rendered site.

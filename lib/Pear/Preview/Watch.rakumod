@@ -1,5 +1,6 @@
 use Pear::Preview::HTTP;
 use File::Find;
+use Log;
 
 unit class Pear::Preview::Watch;
 
@@ -8,6 +9,8 @@ has $.config;
 has Int:D $.port           = 3000;
 has Str:D $.host           = '0.0.0.0';
 has Bool:D $.no-livereload = False;
+
+has Log $!log .= new;
 
 method build-and-reload( --> Bool ) {
     $!writer.?write();
@@ -24,14 +27,15 @@ method user-input( Array :$servers --> Bool ) {
 
         given prompt('') {
             when 'r' {
-                put "Rebuild triggered";
+                $!log.info('Rebuild triggered');
                 self.build-and-reload;
             }
             when 'c' {
-                put "Clear build directory and rebuild triggered";
+                $!log.info('Clear build directory and rebuild triggered');
                 self.build-and-reload;
             }
             when 'q'|'quit' {
+                $!log.info('Stopping watch...');
                 exit 1;
             }
         }
@@ -40,7 +44,7 @@ method user-input( Array :$servers --> Bool ) {
 
 method start( --> Bool ) {
     # Initialize build
-    put "Initial build";
+    $!log.info('Initial build');
     $!writer.write;
    
     # Track time delta between File events. 
@@ -52,7 +56,7 @@ method start( --> Bool ) {
     my List $dirs = (.content-dir, .templates-dir, .include-dir) given $!config;
 
     $dirs.map(-> $dir {
-        put "Starting watch on {$dir.subst("{$*CWD}/", '')}"
+        $!log.info("Starting watch on {$dir.subst("{$*CWD}/", '')}")
     });
 
     # Start server
@@ -74,7 +78,7 @@ method start( --> Bool ) {
                 # Make sure the file change is a 
                 # known extension; don't re-render too fast
                 if so $exts (cont) $e.path.IO.extension and (now - $last_run) > 2 {
-                    put "Change detected [{$e.path()}]";
+                    $!log.info("Change detected [{$e.path()}]");
                     self.build-and-reload();
                     $last_run = now;
                 }

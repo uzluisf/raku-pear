@@ -23,7 +23,8 @@
         "Text::Markdown",
         "Template::Mustache",
         "File::Find",
-        "HTTP::Server::Tiny"
+        "HTTP::Server::Tiny",
+        "Log"
     ],
     "build-depends" : [],
     "test-depends" : [] 

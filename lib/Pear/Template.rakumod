@@ -1,4 +1,5 @@
 use Template::Mustache;
+use Log;
 
 unit class Pear::Template;
 
@@ -8,6 +9,8 @@ has $.include-dir;   # directory where assets are located
 has %!templates;     # template's name to template's location hash
 has %!globals;       # global variables made available to a template
 
+has Log $!log .= new;
+
 ########################################
 # public methods
 ########################################
@@ -16,21 +19,27 @@ submethod TWEAK() {
     self!load-templates;
 }
 
-method render-page( %page ) {
+method render-page( %page --> Str ) {
 
     # make sure each page specifies a template (index, blog, etc.).
     if %page<template>:!exists {
-        say "=> Page has no template";
+        my $msg = "Page {%page<url>} specifies no template";
+        $!log.warn($msg);
+        return '<p>' ~ $msg ~ '</p>';
     }
 
     # make sure each page specifies only one template.
     unless %page<template>.elems == 1 and %page<template> ~~ Str {
-        say "Each page should have a single template";
+        my $msg = "Page {%page<url>} specifies more than a single template";
+        $!log.warn($msg);
+        return '<p>' ~ $msg ~ '</p>';
     }
 
     # make sure template specified in a page exists.
     if %!templates{ %page<template> }:!exists {
-        say "Template {%page<template>} in page doesn't exist in the {$!templates-dir} directory";
+        my $msg = "Template {%page<template>} in page doesn't exist in the {$!templates-dir} directory";
+        $!log.warn($msg);
+        return '<p>' ~ $msg ~ '</p>';
     }
 
     # template seems to exists so get a hold of it.
@@ -63,7 +72,7 @@ method render-page( %page ) {
     ;
 }
 
-method update-globals( *%global-vars ) {
+method update-globals( *%global-vars --> Nil ) {
     for %global-vars.keys -> $var {
         %!globals{$var} = %global-vars{$var};
     }
@@ -83,6 +92,13 @@ method !get-partials {
 }
 
 method !render-template( :%context, Str :$content, :@from --> Str:D ) {
+    if %context<page><filename> {
+        $!log.info("Rendering file '{%context<page><filename>}'");
+    }
+    elsif %context<tag> {
+        $!log.info("Rendering tag file '{%context<tag><name>}'");
+    }
+
     quietly {
         Template::Mustache.render: $content, %context, :@from;
     }

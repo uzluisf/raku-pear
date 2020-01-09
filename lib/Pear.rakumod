@@ -1,6 +1,8 @@
 use Pear::Utils;
 use Pear::Template;
 use Pear::Preview;
+use Pear::Config;
+use Log;
 
 unit class Pear;
 
@@ -8,62 +10,83 @@ unit class Pear;
 # public attributes
 ########################################
 
-has $.working-dir is required;
-has $.config      is required;
+has IO::Path $.working-dir is required;
+has Config   $.config      is required;
 
 ########################################
 # private attributes
 ########################################
 
-has @!pages;
-has @!posts;
-has %!tags;
-has $!template;
+has Hash @!pages;
+has Hash @!posts;
+has      %!tags;
+has Template $!template;
 
 has %!include;
+
+has Log $!log .= new;
 
 ########################################
 # public methods
 ########################################
 
 submethod TWEAK {
+    $!log.info("Pear working in directory '{$!working-dir.basename}'");
+
     $!template = Template.new(
         :templates-dir($!config.templates-dir), :include-dir($!config.include-dir)
     );
 
+    unless $!config.output-dir.e {
+        $!log.debug("Creating '{$!config.output-dir.basename}'");
+        mkdir $!config.output-dir;
+    }
+
+    $!log.debug("Creating '{$!config.output-dir.basename}'");
     self!copy-to-site($!config.include-dir);
 }
 
 #| Generate post pages.
-method generate-posts {
+method generate-posts( --> Nil ) {
     @!posts = Empty;
 
     # we must collect posts before generating them.
     self!collect-posts();
 
+    $!log.info("Generating posts from '{$!config.content-dir.basename}'");
+
     # now let's generate the posts.
-    my $post-dir = 'posts';
+    my Str $post-dir = 'posts';
     for @!posts -> $post {
-        my $html      = $!template.render-page($post);
-        my $post-url  = $!config.output-dir.add($post<url>);
-        my $post-file = $post-url.add('index.html');
+        my Str $html = $!template.render-page($post);
+        my IO::Path $post-url  = $!config.output-dir.add($post<url>);
+        my IO::Path $post-file = $post-url.add('index.html');
+
+        my $d = $post-file.subst("{$!working-dir}/", '');
+        $!log.debug("Generating post '$d'");
+
         self!write-html($post-file, $html);
     }
 }
 
 #| Generates regular pages.
-method generate-pages {
+method generate-pages( --> Nil ) {
     @!pages = Empty;
 
     # we must collect pages before generating them.
     self!collect-pages();
 
+    $!log.info("Generating pages from '{$!config.content-dir.basename}'");
+
     # now let's generate the pages.
     for @!pages -> $page {
-        my $html = $!template.render-page($page);
-        my $post-file = $page<url>.contains('index')
+        my Str $html = $!template.render-page($page);
+        my IO::Path $post-file = $page<url>.contains('index')
             ?? $!config.output-dir.IO.add($page<url> ~ '.html')
             !! $!config.output-dir.IO.add($page<url>).add('index.html');
+
+        my $d = $post-file.subst("{$!working-dir}/", '');
+        $!log.debug("Generating page '$d'");
 
         # create the HTML page.
         self!write-html($post-file, $html);
@@ -71,17 +94,20 @@ method generate-pages {
 }
 
 #| Generate tag pages.
-method generate-tags {
+method generate-tags( --> Nil ) {
+    $!log.info("Generating tags");
+
     for %!tags -> $tag-to-posts {
-        my $name   = $tag-to-posts.key.lc; # get tag's name.
-        my @posts := $tag-to-posts.value;  # get posts with given tag.
+        my Str $name = $tag-to-posts.key.lc; # get tag's name.
+        my @posts := $tag-to-posts.value;    # get posts associated to given tag.
         my %page-meta = template => 'tag', tag => %(:$name, :@posts);
-        my $html      = $!template.render-page(%page-meta);
+        my Str $html  = $!template.render-page(%page-meta);
 
-        my $tag-page-url = $!config.output-dir.add('tags').add($name);
+        my IO::Path $tag-page-url = $!config.output-dir.add('tags').add($name);
+        my IO::Path $tag-file = $tag-page-url.IO.add('index.html');
 
-        my $tag-file = $tag-page-url.IO.add('index.html');
-        say "=> ", $tag-file;
+        my $d = $tag-page-url.subst("{$!working-dir}/", '');
+        $!log.debug("Generating tag '$name' in path '$d'");
 
         # create the HTML page.
         self!write-html($tag-file, $html);
@@ -95,7 +121,7 @@ method generate-tags {
 # private methods
 ########################################
 
-method !collect-posts {
+method !collect-posts( --> Nil ) {
     # at the moment, posts live under the 'posts' directory beneath whatever
     # directory content maps to in  the configuration file (e.g., /content/posts).
     my $post-dir = 'posts';
@@ -110,10 +136,12 @@ method !collect-posts {
             when Array { Pear::Utils::format-date(|%post-meta<date>) }
         }
 
+        # this assumes a filename has no dot other than the one for its extension.
+        my $base = %post-meta<filename>.subst(/'.' .* $/, '');
         # post's url under post's directory
         %post-meta<url> = $post-dir.IO
             .add(%post-meta<date>)
-            .add(%post-meta<filename>)
+            .add($base)
             .Str;
 
         @!posts.push(%post-meta);
@@ -192,13 +220,13 @@ method !collect-pages( --> Nil ) {
     }
 }
 
-method !write-html( $post-file, $html ) {
+method !write-html( IO::Path:D $post-file, Str:D $html ) {
     try mkdir $post-file.dirname;
     $post-file.spurt($html);
 }
 
-method !copy-to-site( $dir --> Nil ) {
-    my %dir-to-files = Pear::Utils::walk($!config.include-dir.basename);
+method !copy-to-site( IO::Path:D $dir --> Nil ) {
+    my %dir-to-files = Pear::Utils::walk($dir.basename);
     for %dir-to-files.keys -> $dirname {
         for %dir-to-files{$dirname}.flat -> $file {
             # ignore hidden files
