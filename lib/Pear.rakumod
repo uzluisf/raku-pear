@@ -31,8 +31,6 @@ has Log $!log .= new;
 ########################################
 
 submethod TWEAK {
-    $!log.info("Pear working in directory '{$!working-dir.basename}'");
-
     $!template = Template.new(
         :templates-dir($!config.templates-dir), :include-dir($!config.include-dir)
     );
@@ -130,17 +128,62 @@ method !collect-posts( --> Nil ) {
         # ignore hidden files under the content directory.
         next if $post.basename.starts-with('.');
 
-        my %post-meta    = Pear::Utils::get-metadata($post);
+        my %post-meta = Pear::Utils::get-metadata($post);
+
+        my $d-str = '1970-01-01';
+        my $date = do given %post-meta<date> {
+            when Str {
+                my $d = try Date.new(%post-meta<date>);
+
+                if $! {
+                    $!log.error("{$!.message} in {%post-meta<filename>}");
+                    $d = Date.new($d-str);
+                }
+
+                $d;
+            }
+
+            when Array {
+                my $d = try Date.new(%post-meta<date>[0]);
+
+                if $! {
+                    $!log.error("{$!.message} in {%post-meta<filename>}");
+                    $d = Date.new($d-str);
+                }
+
+                $d;
+            }
+        }
+
         %post-meta<date> = do given %post-meta<date> {
-            when Str   { Pear::Utils::format-date(%post-meta<date>, $!config.settings<date-format> // 'mm/dd/yyyy') }
-            when Array { Pear::Utils::format-date(|%post-meta<date>) }
+            my $fallback-format = '%m/%d/%Y';
+            when Str {
+                unless $!config.settings<date-format> {
+                    $!log.warn('Using ' ~ $fallback-format.raku ~
+                    " format for {%post-meta<filename>}"
+                    )
+                }
+
+                Pear::Utils::strftime(
+                    Date.new($date.Str),
+                    $!config.settings<date-format> // $fallback-format
+                )
+            }
+            when Array {
+                Pear::Utils::strftime(
+                    Date.new($date.Str),
+                    %post-meta<date>[1]
+                )
+            }
         }
 
         # this assumes a filename has no dot other than the one for its extension.
         my $base = %post-meta<filename>.subst(/'.' .* $/, '');
-        # post's url under post's directory
+        # post's url under post's directory. They are created in the format
+        # YYYY/MM/DD/post/index.html
+        my &formatter = { sprintf "%04d/%02d/%02d", .year, .month, .day };
         %post-meta<url> = $post-dir.IO
-            .add(%post-meta<date>)
+            .add($date.clone(:&formatter).Str)
             .add($base)
             .Str;
 

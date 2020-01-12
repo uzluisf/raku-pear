@@ -27,6 +27,8 @@ multi MAIN(
     Bool:D :$skip-tags   = False,         #= Skip tags generation. (Default = False)
     Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
 ) {
+    $log.info("Pear working in directory '{$working-dir.basename}'");
+    $log.info("Loading configuration file '{$config.config-name}'");
 
     # update configuration file.
     if $config-name ne 'config.yaml' {
@@ -64,6 +66,9 @@ multi MAIN(
     Bool:D :$no-livereload = False,       #= Disable livereload when running pear watch. (Default = False)
     Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
 ) {
+    $log.info("Pear working in directory '{$working-dir.basename}'");
+    $log.info("Loading configuration file '{$config.config-name}'");
+
     # This could've been an anonymous class but for the sake of clarity,
     # we're giving it a name. The watcher call the method 'write' on its
     # attribute 'writer'.

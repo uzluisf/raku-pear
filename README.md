@@ -9,6 +9,11 @@
 - [uzluisf](https://github.com/uzluisf/), Uceta, Luis
 - [ivan-hinson](https://github.com/ivan-hinson), Hinson, Ivan
 
+### Project info
+
+- [Documentation](./MODDOC.md)
+- [Installation](./INSTALL.md)
+
 ### Group info (check all that apply - add an X in the [ ])
 - [ ] We are a CUNY2X bootcamp cohort team
 - [ ] We are a Daedalus / Google Mentored group

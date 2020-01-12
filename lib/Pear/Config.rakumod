@@ -51,8 +51,6 @@ submethod TWEAK {
 method load-config {
     my $config-file = $!working-dir.IO.add($!config-name);
 
-    $!log.info("Loading configuration file '{$!config-name}'");
-
     unless $config-file.e {
         my $prompt = prompt 'No configuration file found. Use default config? [Y/n]: ';
         my $use-default = $prompt.lc.substr(0, 1) eq 'y' ?? True !! False;

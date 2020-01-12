@@ -1,7 +1,7 @@
 Pear
 ====
 
-Pear is a simple static site generator written in [Raku](https://raku.org/).
+Pear is a simple static site generator written in [Raku](https://raku.org/). It uses [Mustache](https://mustache.github.io/) for its templating.
 
 **NOTE**: `MODDOC.md` is generated from `doc/Pear.rakudoc` with `raku --doc=Markdown doc/Pear.rakudoc > MODDOC.md`. Any update to the module's documentation should be made to `doc/Pear.rakudoc`.
 
@@ -40,17 +40,29 @@ First of all, the [Rakudo compiler](https://rakudo.org/) must be installed on th
 
   * [`YAMLish`](https://github.com/Leont/yamlish) for parsing the YAML configuration file.
 
+  * [`Log`](https://github.com/whity/perl6-log) for logging messages while Pear is running.
+
+  * [`HTTP::Server::Tiny`](https://github.com/tokuhirom/p6-HTTP-Server-Tiny) for the server functionality.
+
 If not installed, all these modules will be installed automatically by `zef` during the installation of Pear. They can all be found in the Raku ecosystem at [https://modules.raku.org/](https://modules.raku.org/)
 
 Example
 =======
 
-You can find an example website under TBD directory which can be found live at TBD.
+You can find the source files for a sample website at https://github.com/uzluisf/pear-demo which can be found live at https://uzluisf.github.io/pear-demo/.
 
-If you'd like to generate the website under TBD, then follow this chain of commands:
+To generate the HTML for the website yourself, download the repo and then follow these commands:
 
-    $ cd TBD
+    $ cd pear-demo/
     $ pear render
+
+To serve the rendered site:
+
+    $ pear serve
+
+To live preview it while it's rendered upon changes:
+
+    $ pear watch
 
 Configuration
 =============
@@ -65,24 +77,26 @@ The configuration for a site is controlled by the YAML file in the site's root d
       posts:     blog
       output:    public
 
-Everything in the configuration file will be provided to the templates in the global variable `site`, except `directories`. For instance, the site's title is available as `site.title`.
+Everything in the configuration file will be provided to the templates in the global variable `site`, except `directories`. For instance, the site's title would be available as `site.title`.
 
 Global variables
 ================
 
+**Note:** Most variables made available have more attributes than the ones mentioned below but they aren't necessarily useful to a template.
+
 The following variables are made available to the templates:
 
-  * `site`, user defined variables from `config.yaml`. By default, `site` includes the following variables:
+  * `site`, user defined variables from the configuration file (e.g., `config.yaml`). By default, `site` includes the following variables:
 
-    * `include`, list of directories under the include directory specified in the YAML configuration file.
+    * `include`, list of directories under the directory for static files specified in the YAML configuration file. Note that this is always `include` regardless of what it's specified in the configuration file.
 
     * `time`, the time at the moment `pear` is executed in the site's root directory.
 
-  * `page`, information about a page. A page contains the following attribute(s):
+  * `page`, information about a page (e.g., `page.title`). A post and a tag outside the global variables `posts` and `tags` respectively are considered regular pages. Thus, this means a page might contain more attributes than the ones mentioned below (See `post` and `tag` for their own respective attributes):
 
     * `content`, the post's HTML content.
 
-    * `posts`, list of all your posts.
+  * `posts`, list of all the blog posts.
 
   * `tags`, list of tags from the blog posts.
 
@@ -91,7 +105,7 @@ Other variables
 
 The following variables are accessible via global variables:
 
-  * `post`, information about a given post and only accessible when iterating over `posts`. A post contains the following attributes:
+  * `post`, information about a given post and only accessible when iterating over the global variable `posts`. A post contains the following attributes:
 
     * `content`, the post's HTML content (e.g., `<h2>Say's Phoebe</h2>`).
 
@@ -105,21 +119,19 @@ The following variables are accessible via global variables:
 
     * `tags`, the tags. See `tag` for the attributes a tag holds.
 
-    * `template`, the template with which the post is rendered. Each post must specify a template.
+    * `template`, the template with which the post is rendered. Note that each post must specify a template.
 
-    * `date`, the post's date. Its format must be `yyyy-mm-dd`. Nonetheless, you can change its formatting by specifying the preferred format. Thus, there are the following possibilities:
+    * `date`, the post's date. Its format must be `yyyy-mm-dd`. Nonetheless, you can change its formatting by specifying the preferred format. The date format is based on `strftime`'s directives; there's a reference for it at https://strftime.org/ and for live preview at http://www.strftime.net/. For date in the page's metadata, there are the following options:
 
-      * `date: 2019-12-25`, left as is if not format specified in the configuration file.
+      * `date: 2019-12-25`, if not format specified in the the configuration file (with `date-format`), then the default format `%b %d, %Y` will be used.
 
-      * `date: [2019-12-25, dd/mm/yyyy]`, format date according to given format. Run `pear --date-formats` to get a list of the supported formats.
+      * `date: [2019-12-25, %Y/%m/%d]`, format date according to given format.
 
     * `draft`, is the post a draft? If set to `true`, the post won't appear in the generated HTML for the site.
 
-`date` and `draft` should be set in the post's metadata.
-
 All the other attributes in a post's metadata will be included alongside the attributes discussed earlier. However, Pear won't mess with them. For instance, you can have `title: tHiS iS a TitlE` and `tHiS iS a TitlE` will be the post's title.
 
-  * `tag`, information about a tag and only accessible when iterating over `tags`. A tag contains the following attributes:
+  * `tag`, information about a tag and only accessible when iterating over the global variable `tags`. A tag contains the following attributes:
 
     * `name`, the tag's name (e.g, `linux`).
 
