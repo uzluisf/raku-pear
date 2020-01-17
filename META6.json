@@ -17,7 +17,7 @@
         "Pear::Preview::HTTP" : "lib/Pear/Preview/HTTP.rakumod",
         "Pear::Preview::Watch" : "lib/Pear/Preview/Watch.rakumod"
     },
-    "resources" : [],
+    "resources" : ["config.yaml", "templates/atom-feed.mustache"],
     "depends" : [
         "YAMLish",
         "Text::Markdown",
