@@ -11,8 +11,9 @@
 
 ### Project info
 
-- [Documentation](./MODDOC.md)
+- [Project](./PROJECT.md)
 - [Installation](./INSTALL.md)
+- [Documentation and demo site](https://uzluisf.github.io/pear-doc/)
 
 ### Group info (check all that apply - add an X in the [ ])
 - [ ] We are a CUNY2X bootcamp cohort team
