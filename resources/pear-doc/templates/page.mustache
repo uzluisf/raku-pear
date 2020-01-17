@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{> head }}
+
+<body class='page'>
+{{> main-menu-mobile }}
+    <div class="wrapper">
+        {{> header }}
+
+        <div class="strip">
+          <div class="container pt-4 pb-16">
+            <div class="row">
+              <div class="col-12">
+                <h1 class="title">{{ page.title }}</h1>
+                <div class="content">
+                    {{#page.content}}{{{ page.content }}}{{/page.content}}
+                    {{^page.content}}
+                    <p>{{ site.params.homepage-intro }}</p>
+                    {{/page.content}}
+                </div>
+
+                {{^page.content}}
+                <a class="button button-primary mb-2" href="{{ site.base-url }}{{site.params.homepage-button-link}}">
+                    {{site.params.homepage-button-text}}
+                </a>
+                {{/page.content}}
+
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    {{^page.content}}
+        {{#site.params.homepage-image}}
+        <div class="strip">
+          <div class="container pt-4 pb-4">
+            <div class="row justify-content-center">
+              <div class="col-12 col-md-10">
+                <div class="terminal">
+                    <img src="{{site.base-url}}include/images/{{ site.params.homepage-image }}" />
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        {{/site.params.homepage-image}}
+    {{/page.content}}
+
+  {{> footer }}
+
+</body>
+
+</html>
+

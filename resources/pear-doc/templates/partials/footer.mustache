@@ -1,0 +1,21 @@
+<div class="sub-footer">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="sub-footer-inner">
+          <ul>
+            {{#site.params.footer}}
+                <li><a href="{{url}}">{{name}}</a></li>
+            {{/site.params.footer}}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+{{#site.include.js}}
+ <script src="{{site.base-url}}{{.}}"></script>
+{{/site.include.js}}
+</footer>

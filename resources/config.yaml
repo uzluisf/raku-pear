@@ -1,0 +1,16 @@
+title: MySite
+base-url: /               # base URL to use for all relative URLs in a page
+date-format: '%m %d, %Y' # date format for post's date unless it specifies its own
+
+# This is how the default template for the rss feed envisions how
+# the author's info is structured. It doesn't need to be like this though.
+author:
+  name: John Doe
+  email: john@doe.com
+
+# The directories Pear must be aware of.
+directories:
+  content: content
+  templates: templates
+  include: static
+  output: public

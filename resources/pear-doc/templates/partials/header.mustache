@@ -1,0 +1,29 @@
+<div class='header'>
+  <div class="container">
+
+    <div class="logo">
+      <a href="{{site.base-url}}"><img alt="Logo" src="{{site.base-url}}include{{site.params.logo.standard}}"/></a>
+    </div>
+
+    <div class="logo-mobile">
+      <a href="{{site.base-url}}"><img alt="Logo" src="{{site.base-url}}include{{site.params.logo.standard}}"/></a>
+    </div>
+    
+    <!-- Header navigation -->
+    <div id="main-menu" class="main-menu">
+      <ul>
+        {{#site.menu}}
+        <li class="menu-item-{{ name }}">
+        <a href="{{site.base-url}}{{ url }}"><span>{{ name }}</span></a>
+        </li>
+        {{/site.menu}}
+      </ul>
+    </div>
+
+    <!-- Hamburger -->
+    <button id="toggle-main-menu-mobile" class="hamburger hamburger--slider" type="button">
+        <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+    </button>
+  </div>
+</div>
+

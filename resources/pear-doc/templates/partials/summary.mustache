@@ -1,0 +1,9 @@
+<span class="overview">Overview</span>
+<h1 class="title">Posts</h1>
+
+{{#posts}}
+<div class="summary mb-2">
+    <h2 class="title-summary"><a href="{{site.base-url}}{{ url }}">{{ title }}</a></h2>
+    <p>{{ summary }}</p>
+</div>
+{{/posts}}

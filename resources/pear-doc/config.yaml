@@ -1,0 +1,48 @@
+title: Pear
+subtitle: "A simple static site generator"
+base-url: "https://uzluisf.github.io/pear-doc/"
+#base-url: "/"
+date-format: "%m %d, %Y"
+
+directories:
+    content: content
+    templates: templates
+    include: include
+    output: docs
+
+menu:
+    - name: Home
+      url: ""
+    - name: Docs
+      url: "docs/"
+    - name: About
+      url: "about/"
+
+sidebar:
+  - section: Docs
+    subsections:
+      - name: Quickstart
+        url: "docs/quickstart/"
+      - name: Command line
+        url: "docs/command-line/"
+      - name: Config
+        url: "docs/config/"
+      - name: Templates
+        url: "docs/templates/"
+#  - section: News
+#    subsections:
+#      - name: Latest posts
+#        url: "posts/"
+#      - name: Feed
+#        url: "atom.xml"
+
+params:
+    homepage-button-link: "docs/"
+    homepage-button-text: "Read the docs"
+    homepage-intro: "Pear is a simple static site generator written in Raku."
+    footer:
+        - name: pear
+          url : "#"
+    logo:
+        standard: "/images/logo.svg"
+ 
