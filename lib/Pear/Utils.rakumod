@@ -5,7 +5,7 @@ unit module Pear::Utils;
 
 my regex post {
     '---'
-    $<meta> = (.*)
+    $<meta> = (.*?)
     '---'
     $<body> = (.*)
 }

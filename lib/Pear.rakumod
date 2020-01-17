@@ -20,7 +20,7 @@ has Config   $.config      is required;
 has Hash @!pages;
 has Hash @!posts;
 has      %!tags;
-has Template $!template;
+has Pear::Template $!template;
 
 has %!include;
 
@@ -31,7 +31,7 @@ has Log $!log .= new;
 ########################################
 
 submethod TWEAK {
-    $!template = Template.new(
+    $!template = Pear::Template.new(
         :templates-dir($!config.templates-dir), :include-dir($!config.include-dir)
     );
 
@@ -115,6 +115,33 @@ method generate-tags( --> Nil ) {
     %!tags = Empty;
 }
 
+#| Generate the Atom feed for the site.
+method generate-feed( Str $template? --> Nil ) {
+    use Template::Mustache;
+
+    my $filename = 'atom.xml';
+    my $content;
+
+    if $template.defined && $!template.template-exist($template) {
+        $content = $!config.templates-dir.add($template).slurp;
+    }
+    elsif $template.defined {
+        $!log.warn("Specified template for feed doesn't exist. Using default.");
+        $content = %?RESOURCES<templates/atom-feed.mustache>.slurp;
+    }
+    else {
+        $content = %?RESOURCES<templates/atom-feed.mustache>.slurp;
+    }
+
+    my $feed-url = $!config.output-dir.add($filename);
+    my $feed = Template::Mustache.render(
+        $content,
+        $!template.get-globals
+    );
+
+    self!write-html($feed-url, $feed);
+}
+
 ########################################
 # private methods
 ########################################
@@ -159,8 +186,7 @@ method !collect-posts( --> Nil ) {
             my $fallback-format = '%m/%d/%Y';
             when Str {
                 unless $!config.settings<date-format> {
-                    $!log.warn('Using ' ~ $fallback-format.raku ~
-                    " format for {%post-meta<filename>}"
+                    $!log.warn("Using fallback format 'm/d/Y' for {%post-meta<filename>}"
                     )
                 }
 
@@ -223,7 +249,7 @@ method !collect-posts( --> Nil ) {
         $post<tags> = @post-tags;
         $post<id>   = $post<url>;
 
-        my ($previous, $next) = ($post-num + 1, $post-num - 1);
+        my ($previous, $next) = ($post-num - 1, $post-num + 1);
         $post<previous> = $previous < @!posts.elems ?? @!posts[$previous] !! False;
         $post<next>     = $next >= 0 ?? @!posts[$next] !! False;
     }
@@ -248,19 +274,35 @@ method !collect-posts( --> Nil ) {
 }
 
 method !collect-pages( --> Nil ) {
-    for dir($!config.content-dir) -> $page {
-        # ignore directories. For the moment, only files directly under
-        # the 'content' directory are considered.
-        next if $page.IO.d;
+    my @pages =  gather for dir($!config.content-dir) -> $page {
+        # collect pages immediately under the content directory.
+        if $page.IO.f {
+            # ignore hidden file.
+            next if $page.basename.starts-with('.');
 
-        # ignore hidden file.
-        next if $page.basename.starts-with('.');
+            my %page-meta = Pear::Utils::get-metadata($page);
+            %page-meta<url> = %page-meta<filename>.split('.', *).first;
+            take %page-meta;
+        }
 
-        my %page-meta = Pear::Utils::get-metadata($page);
-        %page-meta<url> = (%page-meta<filename>).IO.basename.split('.', *).first;
+        # collect pages from directories immediately under the content
+        # directory. Ignore directories inside these directories.
+        if $page.d && !$page.ends-with('posts') {
+            for dir($page) -> $subpage {
+                # ignore hidden file.
+                next if $subpage.basename.starts-with('.');
 
-        @!pages.push(%page-meta);
+                # ignore directories
+                next if $subpage.IO.d;
+
+                my %page-meta = Pear::Utils::get-metadata($subpage);
+                %page-meta<url> = $page.basename.IO.add(%page-meta<filename>.split('.', *).first);
+                take %page-meta;
+            }
+        };
     }
+
+    @!pages.append(@pages);
 }
 
 method !write-html( IO::Path:D $post-file, Str:D $html ) {

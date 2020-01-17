@@ -25,7 +25,9 @@ multi MAIN(
     Bool:D :$skip-pages  = False,         #= Skip pages generation. (Default = False)
     Bool:D :$skip-blog   = False,         #= Skip blog generation. (Default = False)
     Bool:D :$skip-tags   = False,         #= Skip tags generation. (Default = False)
-    Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
+    Bool:D :$skip-feed   = False,         #= Skip feed generation. (Default = False)
+    Str:D  :$config-name = 'config.yaml', #= Name of configuration file. (Default = config.yaml)
+    Str    :$feed-template                #= Mustache template for atom feed.
 ) {
     $log.info("Pear working in directory '{$working-dir.basename}'");
     $log.info("Loading configuration file '{$config.config-name}'");
@@ -41,6 +43,7 @@ multi MAIN(
         .generate-pages if !$skip-pages;
          # tags are collected from posts so tags must be generated after posts.
         .generate-tags  if !$skip-tags;
+        .generate-feed($feed-template) if !$skip-feed;
     }
 
     $log.info("Site rendered at '{$config.output-dir.basename}'");

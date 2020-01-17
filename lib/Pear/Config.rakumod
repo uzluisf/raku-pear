@@ -20,23 +20,6 @@ has IO::Path $!include-dir;
 has IO::Path $!output-dir;
 has          %!settings;
 
-=begin comment
-These are the directories pear expect in the site's root directory. Different
-names could be used. For instance, one might want to name the directory
-that stores images, CSS, JS, etc. 'static'. In the config file, this
-is just 'include: static'.
-=end comment
-has $!default-config = q:to/YAML/;
-base-url: /
-date-format: 'yyyy-mm-dd'
-
-directories:
-  templates: templates
-  include: include
-  posts: posts
-  output: public
-YAML
-
 has Log $!log .= new;
 
 ########################################
@@ -57,7 +40,7 @@ method load-config {
 
         if $use-default {
             $!log.info("Writing default config at '{$!config-name}'");
-            $config-file.spurt($!default-config);
+            $config-file.spurt(%?RESOURCES<config.yaml>.slurp);
         }
     }
 

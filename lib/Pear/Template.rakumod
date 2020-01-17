@@ -36,7 +36,8 @@ method render-page( %page --> Str ) {
     }
 
     # make sure template specified in a page exists.
-    if %!templates{ %page<template> }:!exists {
+    unless self.template-exist(%page<template>) {
+    #if %!templates{ %page<template> }:!exists {
         my $msg = "Template {%page<template>} in page doesn't exist in the {$!templates-dir} directory";
         $!log.warn($msg);
         return '<p>' ~ $msg ~ '</p>';
@@ -78,6 +79,14 @@ method update-globals( *%global-vars --> Nil ) {
     }
 }
 
+method get-globals {
+    %!globals
+}
+
+method template-exist( Str:D $template-name --> Bool ) {
+    %!templates{ $template-name }:exists
+}
+
 ########################################
 # private methods
 ########################################
@@ -113,7 +122,7 @@ method !load-templates {
         }
     }
     else {
-        say "No such '$!templates-dir' directory";
+        $!log.warn("No such '$!templates-dir' directory");
         exit;
     }
 }
