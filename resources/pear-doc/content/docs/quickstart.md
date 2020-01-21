@@ -17,12 +17,10 @@ $ cd winter-2020-codefest-submissions-phoebe
 $ zef install .
 ```
 
-After mynt has been installed, run the mynt command with the `--version` flag to
-confirm everything completed successfully.
+After Pear has been installed, run `pear` to confirm everything completed
+successfully. If everything went fine, then the usage message should be printed
+to the terminal. You can also display the usage message with `pear --help`.
 
-```
-$ pear --version
-```
 
 # Directory structure
 
@@ -30,33 +28,54 @@ $ pear --version
 
 The content directory is where all the documents (posts, other pages, etc.)
 for the website live. Under this directory, Pear recognizes anything under
-a `posts` directory as a post.
+a `posts` directory as a post. Everything else is a page which include
+files and other directories directly under the content directory.
+
+It's specified as `content: your-content-dir` in the YAML configuration file.
+See [Config](https://uzluisf.github.io/pear-doc/docs/config/) for more information.
 
 ## The template directory
 
-The template directory is used for the Mustache templates. This directory must
-contain a directory named `partials` which stores the partial templates.
+The template directory is used to store the Mustache templates. This directory
+must contain a directory named `partials` which contains the partial templates.
+
+It's specified as `template: your-template-dir` in the YAML configuration file.
+See [Config](https://uzluisf.github.io/pear-doc/docs/config/) for more information.
 
 ## The include directory
 
 The include directory is used for all the static files such as images, CSS
 files, JS files, etc.
 
+It's specified as `template: your-include-dir` in the YAML configuration file.
+See [Config](https://uzluisf.github.io/pear-doc/docs/config/) for more information.
+
+It's worth noting that regardless how the include directory is named, Pear
+always makes it available to the templates in the global variable `site`
+as `site.include`. See [Templates](https://uzluisf.github.io/pear-doc/docs/templates/)
+for more information.
+
 ## The output directory
 
 The output directory contains the generated HTML for the site.
 
+It's specified as `template: your-output-dir` in the YAML configuration file.
+See [Config](https://uzluisf.github.io/pear-doc/docs/config/) for more information.
+
 # Configuration
 
 The configuration of Pear is handled by a single file at the root of your
-project, `config.yaml`. If the file doesn't exist a set of defaults will be used,
-but if you wish to change any settings you'll have to create it.
+project, `config.yaml`. If the file doesn't exist at the moment `pear` is run,
+then one will be created with some default settings.
 
 One powerful thing about Pear's configuration file, is that everything in it,
-mynt setting or not, is made available to templates. This can be taken advantage
+Pear setting or not, is made available to templates. This can be taken advantage
 of in many ways. For example, you could add a title or author attribute for use
 in templates and then if you ever need to change that information, all you have
 to do is update it in your site's config rather than in every template.
+
+This also means that the templates must be organized according to how
+the data is made available in the configuration file.
 
 # Templates
 
@@ -64,16 +83,20 @@ With your site set up and a general sense of how a Pear site is structured,
 let's move on to templates.
 
 In the case of this guide (and also by default) the renderer used is Mustache.
-If you're not already familiar with Mustache, give the
+Basically, a renderer takes care of knitting the data from the pages and any
+additional data from the configuration file into whatever structure
+a template dictates. If you're not already familiar with Mustache, give the
 [Mustache](https://mustache.github.io/) documentation a quick read.
 
-You can find the source files for this site at. There you'll find the
-`templates` directory used to render the site's content.
+You can find the source files for this site at
+[Github](https://github.com/uzluisf/pear-doc/tree/source) where you'll find
+a `templates` directory used to render the site's content into HTML.
 
 ## Globals
 
-Template globals are variables containing site data that are available in every
-template. There are three template globals: `site`, `posts`, and `tags`.
+Template globals are variables containing site data that are made available
+to every template. There are four template globals: `site`, `posts`, `page`,
+and `tags`.
 
 # Posts
 
@@ -82,13 +105,13 @@ content directory. Both hidden files and directories under `posts` will be
 ignored.
 
 A post's filename can be named anything. However, keep in mind that a post's
-filename will determine the post's url. A post's url will be dictated by
+filename will also determine the post's url. A post's url will be dictated by
 the post's date and its filename (`/2020/01/01/hello`).
 
 ## YAML frontmatter
 
 The YAML frontmatter is a block of YAML fenced by three dashes at the start of a
-post containing post metadata. It looks as follows:
+post containing the post's metadata. It looks as follows:
 
     ---
     template: post
@@ -112,9 +135,10 @@ frontmatter:
   date in the page's frontmater, there are two choices: 1) `date: 2019-12-25`,
   if not format specified in the the configuration file (with `date-format`),
   then the default format `%b %d, %Y` will be used and
-  2) `date: [2019-12-25, %Y/%m/%d]`, date is formatted according to given format.
+  2) `date: [2019-12-25, %Y/%m/%d]`, date is formatted according to the given format.
 
-* `draft`, is the post a draft? If set to `true`, the post won't appear in the generated HTML for the site.
+* `draft`, is the post a draft? If set to `true`, the post won't appear in the
+generated HTML for the site.
 
 * `tags`, a list of tags for the post.
 
@@ -140,8 +164,9 @@ First, all of a post's tags will be available via a `tags` attribute. Second,
 that post will be added to each `tag` in the `tags` property of the global 
 variable `posts`.
 
-From all the tags, Pear will create page named `tags` directly under the site's 
-root.
+From all the tags, Pear will create a directory named `tags` directly under
+the site's root. This directory contains the tags collected from all the posts
+and it's made available to templates as the global variable `tags`.
 
 # Pages
 
@@ -169,9 +194,10 @@ content
 └── misc.md
 ```
 
-Nothing under `content/docs/blog/` will be rendered into a HTML page. Only 
-files directly under `content` and files at the root of any directory under 
-the `content` directory (e.g., `docs/example.md` and `docs/config.md`).
+Neither anything under `content/docs/blog/` nor the file `.ignore-me.md`
+will be rendered into a HTML page. Only files directly under `content`
+and files at the root of any directory under the `content` directory
+(e.g., `docs/example.md` and `docs/config.md`).
 
 # Generation
 

@@ -11,6 +11,7 @@ under certain directory and generate the HTML for a site.
 
 ### Where to start?
 
-If you're looking to get up and running quickly, give the quickstart guide a
-read. Otherwise, if you're familiar with static site generators in general, the
+If you're looking to get up and running quickly, give the
+[quickstart guide](https://uzluisf.github.io/pear-doc/docs/) a read. Otherwise,
+if you're familiar with static site generators in general, the
 other documentation pages may be a better jumping off point for you.

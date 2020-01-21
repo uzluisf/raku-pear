@@ -4,23 +4,22 @@ date: 2000-01-01
 template: post
 ---
 
-# Data
+# Globals
 
-## Globals
-
-### site
+## site
 
 User-defined data from the configuration file (e.g., `config.yaml`).
 By default, `site` includes the following variables:
 
 * `include`, list of directories under the directory for static files specified
-  in the YAML configuration file. Note that this is always `include` regardless
-  of what it's specified in the configuration file.
+  in the YAML configuration file. Note that this is always named `include`
+  regardless of the name specified in the configuration file for the include
+  directory.
 
 * `time`, the time at the moment `pear` is executed in the site's root
   directory.
 
-### page
+## page
 
 Information about a page (e.g., `page.title`). A post and a tag outside the
 global variables `posts` and `tags` respectively are considered regular pages.
@@ -29,19 +28,19 @@ below (See `post` and `tag` for their own respective attributes):
 
 * `content`, the post's HTML content.
 
-### posts
+## posts
 
 List of all the blog posts. See `post` for a post's attributes.
 
-### tags
+## tags
 
 List of tags from the blog posts. See `tag` for a tag's attributes.
 
-## Locals
+# Locals
 
 The following variables are accessible only via global variables:
 
-### post
+## post
 
 Information about a given post and only accessible when iterating over the
 global variable `posts`. A post contains the following attributes:
@@ -67,18 +66,17 @@ global variable `posts`. A post contains the following attributes:
   based on `strftime`'s directives; there's a reference for it at
   https://strftime.org/ and for live preview at http://www.strftime.net/. For
   date in the page's metadata, there are the following options:
+  1) `date: 2019-12-25`, if not format specified in the the configuration file
+  (with `date-format`), then the default format `%b %d, %Y` will be used and
+  2) `date: [2019-12-25, %Y/%m/%d]`, format date according to given format.
 
-  * `date: 2019-12-25`, if not format specified in the the configuration file
-    (with `date-format`), then the default format `%b %d, %Y` will be used.
-
-  * `date: [2019-12-25, %Y/%m/%d]`, format date according to given format.
-
-* `draft`, is the post a draft? If set to `true`, the post won't appear in the generated HTML for the site.
+* `draft`, is the post a draft? If set to `true`, the post won't appear in
+  the generated HTML for the site.
 
 All the other attributes in a post's frontmatter will be included alongside the
 attributes discussed earlier.
 
-### tag
+## tag
 
 Information about a tag and only accessible when iterating over the global
 variable `tags`. A tag contains the following attributes:

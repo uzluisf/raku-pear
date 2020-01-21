@@ -1,21 +1,23 @@
 use Pear;
 use Pear::Config;
 use Log;
- 
-=comment APP SETUP
- 
+
 # Allow that named arguments appear after positional ones.
 # See: https://docs.raku.org/language/create-cli#%*SUB-MAIN-OPTS
 my %*SUB-MAIN-OPTS = :named-anywhere;
- 
-# Set up the directory and the configuration file.
-my $working-dir = $*CWD.absolute.IO;
-my $config      = Pear::Config.new(:$working-dir);
 
-# Set up the application.
-my $app = Pear.new(:$working-dir, :$config);
+my ($working-dir, $config, $app, $log);
 
-my Log $log .= new;
+sub app-setup {
+    # Set up the directory and the configuration file.
+    $working-dir = $*CWD.absolute.IO;
+    $config      = Pear::Config.new(:$working-dir);
+
+    # Set up the application.
+    $app = Pear.new(:$working-dir, :$config);
+
+    $log = Log.new;
+}
 
 =comment CLI OPTIONS
  
@@ -29,6 +31,7 @@ multi MAIN(
     Str:D  :$config-name = 'config.yaml', #= Name of configuration file. (Default = config.yaml)
     Str    :$feed-template                #= Mustache template for atom feed.
 ) {
+    app-setup();
     $log.info("Pear working in directory '{$working-dir.basename}'");
     $log.info("Loading configuration file '{$config.config-name}'");
 
@@ -39,11 +42,12 @@ multi MAIN(
     }
 
     given $app {
-        .generate-posts if !$skip-blog;
-        .generate-pages if !$skip-pages;
-         # tags are collected from posts so tags must be generated after posts.
-        .generate-tags  if !$skip-tags;
-        .generate-feed($feed-template) if !$skip-feed;
+        .generate-posts unless $skip-blog;
+        .generate-pages unless $skip-pages;
+         # tags are collected from posts so tags must be generated after posts
+         # so this ordering is important.
+        .generate-tags  unless $skip-tags;
+        .generate-feed($feed-template) unless $skip-feed;
     }
 
     $log.info("Site rendered at '{$config.output-dir.basename}'");
@@ -54,6 +58,7 @@ multi MAIN(
     'serve',
     Int:D :p(:$port) = 3000, #= Port in which the server should run. (Default = 3000)
 ) {
+    app-setup();
     my $build-dir = $config.output-dir;
     my $server = Pear::Preview::HTTP.new(
         :$build-dir, :$port, :host('localhost'), :!no-livereload, :!omit-html-ext,
@@ -69,6 +74,7 @@ multi MAIN(
     Bool:D :$no-livereload = False,       #= Disable livereload when running pear watch. (Default = False)
     Str:D  :$config-name = 'config.yaml'  #= Name of configuration file. (Default = config.yaml)
 ) {
+    app-setup();
     $log.info("Pear working in directory '{$working-dir.basename}'");
     $log.info("Loading configuration file '{$config.config-name}'");
 
@@ -79,10 +85,13 @@ multi MAIN(
         has $.app;
 
         method write {
+            # here we're generating all of them. Thus it's best to use
+            # `pear render` to have finer control.
             given $!app {
                 .generate-posts;
                 .generate-pages;
                 .generate-tags;
+                .generate-feed('');
             }
         }
     }

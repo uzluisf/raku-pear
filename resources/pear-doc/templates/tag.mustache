@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{{> head }}
+
+<body class='page page-default-list'>
+{{> main-menu-mobile }}
+<div class="wrapper">
+  {{> header }}
+  
+  <div class="container pt-2 pt-md-6 pb-3 pb-md-6">
+    <div class="row">
+      <div class="col-12 col-md-3 mb-3"><div class="sidebar">{{> sidebar }}</div></div>
+      <div class="col-12 col-md-9">
+        <div class="content">
+
+            {{#tag.posts}}
+                <div class="summary mb-2">
+                <h2 class="title-summary"><a href="{{site.base-url}}{{ url }}">{{ title }}</a></h2>
+                </div>
+            {{/tag.posts}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{{> footer }}
+
+</body>
+
+</html>
+

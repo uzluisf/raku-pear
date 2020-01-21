@@ -613,6 +613,33 @@ button.bg-dark:focus {
   display:inline-flex!important
  }
 }
+.header.wrap {
+ text-align:justify;
+ font-size:1px
+}
+.header.wrap::after {
+ display:inline-block;
+ content:"";
+ width:100%
+}
+
+.nav.wrap {
+ margin-top:-15px;
+ margin-left:-5px;
+}
+
+.nav.wrap>* {
+ margin-top:5px
+}
+
+.nav.item {
+ display:inline-block;
+ font-size:14px;
+ line-height:1;
+ padding:2px 6px;
+ margin:5px 5px 5px 0;
+ border-radius:20px
+}
 @media print {
  .d-print-none {
   display:none!important
@@ -8680,6 +8707,8 @@ a.text-dark:focus {
 .table-responsive>.table-bordered {
  border:0
 }
+
+
 /*!* Hamburgers
 * @description Tasty CSS-animated hamburgers
 * @author Jonathan Suh @jonsuh
@@ -9329,7 +9358,9 @@ p {
 }
 .docs-menu h4 {
  font-size:1rem;
- font-weight:700
+ font-weight:700;
+ margin-top: 0.5rem;
+ margin-bottom: 0.5rem;
 }
 .docs-menu ul {
  list-style:none;
@@ -9438,8 +9469,8 @@ p {
  margin-bottom:20px
 }
 .content code {
- background:#f5f5f5;
- padding:3px 6px;
+ background:#ebeaea;
+ padding:1px 2px;
  border-radius:3px;
  font-family:roboto mono,monospace;
  font-size:.9rem;
@@ -9520,7 +9551,7 @@ p {
  margin-bottom:20px
 }
 .content h4 {
- font-size:1.5rem;
+ font-size:1.3rem;
  line-height:1.4;
  font-weight:500;
  font-family:roboto,Arial,sans-serif,-apple-system;
@@ -9528,14 +9559,14 @@ p {
 }
 .content h5 {
  font-size:1.4rem;
- line-height:1.4;
+ line-height:1.0;
  font-weight:600;
  font-family:roboto,Arial,sans-serif,-apple-system;
  margin-bottom:20px
 }
 .content h6 {
  font-size:1.2rem;
- line-height:1.4;
+ line-height:0.6;
  font-weight:700;
  font-family:roboto,Arial,sans-serif,-apple-system;
  margin-bottom:20px
@@ -9669,3 +9700,5 @@ body {
  padding-left:20px;
  padding-right:20px
 }
+
+

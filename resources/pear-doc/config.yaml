@@ -1,7 +1,7 @@
 title: Pear
 subtitle: "A simple static site generator"
 base-url: "https://uzluisf.github.io/pear-doc/"
-#base-url: "/"
+# base-url: "/"
 date-format: "%m %d, %Y"
 
 directories:
@@ -29,12 +29,12 @@ sidebar:
         url: "docs/config/"
       - name: Templates
         url: "docs/templates/"
-#  - section: News
-#    subsections:
-#      - name: Latest posts
-#        url: "posts/"
-#      - name: Feed
-#        url: "atom.xml"
+  - section: News
+    subsections:
+      - name: Latest posts
+        url: "posts/"
+     #- name: Feed
+     #  url: "atom.xml"
 
 params:
     homepage-button-link: "docs/"
@@ -45,4 +45,5 @@ params:
           url : "#"
     logo:
         standard: "/images/logo.svg"
+    show-tags: true
  
