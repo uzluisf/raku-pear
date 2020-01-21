@@ -12,10 +12,10 @@ https://uzluisf.github.io/pear-doc/.
 
 After everything is properly setup:
 
-* Clone this repo and cd into `pear-doc`
+* Clone this branch and cd into `pear-doc`:
 
 ```
-$ git clone https://github.com/uzluisf/pear-doc.git
+$ git clone --single-branch --branch source https://github.com/uzluisf/pear-doc.git
 $ cd pear-doc
 ```
 

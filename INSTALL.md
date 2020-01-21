@@ -1,38 +1,65 @@
-# Installation
+# Prerequisites 
 
-In order to run `pear`, you'll first need the following:
+Pear is written in the [Raku](https://raku.org/) programming language and thus
+a compiler implementing the language is needed. The compiler for Raku is known
+as [Rakudo](https://rakudo.org/) and [zef](https://github.com/ugexe/zef)
+is the standard distribution manager for Raku.
 
-* [Rakudo](https://rakudo.org/), a production-ready and stable implementation
-of the [Raku](https://raku.org/) language.
+## Installing the Rakudo compiler
 
-* [zef](https://github.com/ugexe/zef), a tool for managing Raku modules.
+First, you must get the source code for the compiler at
+https://github.com/rakudo/rakudo/releases. There you'll find all the releases,
+however it's recommended you grab the latest release (i.e., 2019.11). 
 
-## Installing Rakudo
+Now, you should untar/unzip the archive file with the source. Read the 
+`README.md` file to learn about the installation process. Then, follow
+the instructions in the `INSTALL.txt` file to install the compiler.
 
-To make things easier it's recommended that you install Rakudo Star,
-which contains the Rakudo compiler, several modules, and the documentation. 
-The instructions for the different platforms can be found at
-https://rakudo.org/files.
+If everything went fine and you added the executable to the PATH, as suggested
+by the end of the installation, then you should be able to start the REPL
+by typing `raku` in the command line:
 
-Alternatively, you can install *only* the Rakudo compiler. However,
-you must also install `zef` in order to install `pear` and any other module
-from the [ecosystem](https://modules.raku.org/).
+```
+$ raku
+To exit type 'exit' or '^D'
+> 
+```
 
-## Installing `zef`
+Now you can type in your Raku code and have it be evaluated by the REPL.
 
-If you installed only the Rakudo compiler, then you'll need to install `zef`
-manually. The module and its documentation can be found at
-https://github.com/ugexe/zef. The installation instructions are as follows:
+To run a Raku program in a file, just do:
+
+```
+$ raku my-program.raku
+```
+
+## Installing zef
+
+You can find all the relevant information for zef, including its installation,
+at https://github.com/ugexe/zef. The installation commands will be copied
+here for reference:
+
+**Manual installation**:
 
 ```
 $ git clone https://github.com/ugexe/zef.git
 $ cd zef
-$ raku -I. bin/zef install .
+$ perl6 -I. bin/zef install .
 ```
 
-## Installing `pear`
+**Rakudobrew**:
 
-In order to install `pear`, you only need to do the following:
+To install via [rakudobrew](https://github.com/tadzik/rakudobrew), please use
+the following command:
+
+```
+$ rakudobrew build zef
+```
+
+# Installing Pear
+
+At this stage, you should've the Rakudo compiler and zef installed on your
+machine. In order to install Pear, you only need to do the following:
 
 ```
 $ git clone git@github.com:hunter-classes/winter-2020-codefest-submissions-phoebe.git
@@ -40,15 +67,22 @@ $ cd winter-2020-codefest-submissions-phoebe
 $ zef install .
 ```
 
-`zef install .` means install the module in this path (e.g., current directory
-here). If you wish to install any module from the ecosystem you use the same
-command with the module's name (e.g., `zef install YAMLish` to install the
-`YAMLish` module). 
+`zef install .` means install the module in the current directory.
 
-`pear` have several dependencies (i.e., several modules) but you don't need
-to install them manually; `zef` will take care of that while it installs
-`pear`.
+**NOTE**: If you wish to install any module from the
+[ecosystem](https://modules.raku.org/) you can use the same command with the
+module's name. For instance, to install the
+[JSON::Tiny](https://modules.raku.org/dist/JSON::Tiny:cpan:MORITZ) module, 
+you run `zef install JSON::Tiny` and zef will take to install the module and
+all the module's dependencies if it has any. Run `zef` to learn more zef
+commands.
 
-## More info about `pear`
+Pear has several dependencies but, as mentioned above, `zef` takes care of them.
 
-Information about `pear` can be found at [MODDOC.md](./MODDOC.md).
+# Using Pear
+
+Now that Pear is installed, you can run `pear` and it should print out Pear's
+usage message. You can go to https://github.com/uzluisf/pear-doc/tree/source and 
+follow the instructions there to generate a demo site using Pear.
+
+You can find more about Pear at https://uzluisf.github.io/pear-doc/.
