@@ -8,8 +8,10 @@ is the standard distribution manager for Raku.
 ## Installing the Rakudo compiler
 
 First, you must get the source code for the compiler at
-https://github.com/rakudo/rakudo/releases. There you'll find all the releases,
-however it's recommended you grab the latest release (i.e., 2019.11). 
+https://rakudo.org/. Alternatively, you can find all the compiler
+releases at https://github.com/rakudo/rakudo/releases. There you will
+find the latest release, Rakudo version 2020.01. I recommended you install
+Rakudo version 2019.11.
 
 Now, you should untar/unzip the archive file with the source. Read the 
 `README.md` file to learn about the installation process. Then, follow
@@ -44,7 +46,7 @@ here for reference:
 ```
 $ git clone https://github.com/ugexe/zef.git
 $ cd zef
-$ perl6 -I. bin/zef install .
+$ raku -I. bin/zef install .
 ```
 
 **Rakudobrew**:
