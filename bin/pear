@@ -29,7 +29,7 @@ multi MAIN(
     Bool:D :$skip-tags   = False,         #= Skip tags generation. (Default = False)
     Bool:D :$skip-feed   = False,         #= Skip feed generation. (Default = False)
     Str:D  :$config-name = 'config.yaml', #= Name of configuration file. (Default = config.yaml)
-    Str    :$feed-template                #= Mustache template for atom feed.
+    Str    :$feed-template,               #= Mustache template for atom feed.
 ) {
     app-setup();
     $log.info("Pear working in directory '{$working-dir.basename}'");
@@ -50,7 +50,7 @@ multi MAIN(
         .generate-feed($feed-template) unless $skip-feed;
     }
 
-    $log.info("Site rendered at '{$config.output-dir.basename}'");
+    $log.info("Site rendered at '{$config.output-dir.basename}' directory");
 }
 
 #| Start local web server and serve rendered site.

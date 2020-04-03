@@ -157,8 +157,11 @@ method !collect-posts( --> Nil ) {
 
         my %post-meta = Pear::Utils::get-metadata($post);
 
+        # ignore posts labeled as drafts.
+        next if %post-meta<draft>;
+
         my $d-str = '1970-01-01';
-        my $date = do given %post-meta<date> {
+        %post-meta<date-obj> = do given %post-meta<date> {
             when Str {
                 my $d = try Date.new(%post-meta<date>);
 
@@ -191,13 +194,13 @@ method !collect-posts( --> Nil ) {
                 }
 
                 Pear::Utils::strftime(
-                    Date.new($date.Str),
+                    Date.new(%post-meta<date-obj>.Str),
                     $!config.settings<date-format> // $fallback-format
                 )
             }
             when Array {
                 Pear::Utils::strftime(
-                    Date.new($date.Str),
+                    Date.new(%post-meta<date-obj>.Str),
                     %post-meta<date>[1]
                 )
             }
@@ -209,7 +212,7 @@ method !collect-posts( --> Nil ) {
         # YYYY/MM/DD/post/index.html
         my &formatter = { sprintf "%04d/%02d/%02d", .year, .month, .day };
         %post-meta<url> = $post-dir.IO
-            .add($date.clone(:&formatter).Str)
+            .add(%post-meta<date-obj>.clone(:&formatter).Str)
             .add($base)
             .Str;
 
@@ -226,12 +229,12 @@ method !collect-posts( --> Nil ) {
     }
 
     # sort posts based by date (newest to oldest).
-    @!posts .= sort(-> $post { $post<date> });
+    @!posts .= sort(-> $post { $post<date-obj> });
     @!posts .= reverse.Array;
 
-    # sort posts by tag based on date (ascending order).
+    # sort posts by tag based on date (newest to oldest).
     for %!tags.keys -> $tag {
-        %!tags{$tag} = %!tags{$tag}.sort(-> $post { $post<date> }).Array
+        %!tags{$tag} = %!tags{$tag}.sort(-> $post { $post<date-obj> }).reverse.Array
     }
 
     # include post's tags. Also include previous and next posts for a given post.
@@ -240,7 +243,7 @@ method !collect-posts( --> Nil ) {
 
         if $post<tags> {
             for $post<tags>.flat -> $name {
-                my $url = 'tags'.IO.add($name.lc).Str;
+                my $url = 'tag'.IO.add($name.lc).Str;
                 my %tag = :$name, :$url, posts => |%!tags{$name};
                 @post-tags.push(%tag);
             }
@@ -257,7 +260,7 @@ method !collect-posts( --> Nil ) {
     # collect tags made available to the templates.
     my @tags;
     for %!tags.keys -> $name {
-        my $url = 'tags'.IO.add($name.lc).Str;
+        my $url = 'tag'.IO.add($name.lc).Str;
         my %tag = :$name, :$url, posts => |%!tags{$name};
         @tags.push(%tag);
     }
@@ -269,12 +272,15 @@ method !collect-posts( --> Nil ) {
     my %site = %(time => DateTime.now.Str, include => %!include);
     %site    = %site, |$!config.settings;
 
+    # remove Date object from posts; it wouldn't be of any use to the templates.
+    @!posts.map({ $_<date-obj>:delete });
+
     # update global variables for the templates.
     $!template.update-globals(:@!posts, :@tags, :%site);
 }
 
 method !collect-pages( --> Nil ) {
-    my @pages =  gather for dir($!config.content-dir) -> $page {
+    my @pages = gather for dir($!config.content-dir) -> $page {
         # collect pages immediately under the content directory.
         if $page.IO.f {
             # ignore hidden file.

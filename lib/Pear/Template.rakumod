@@ -23,24 +23,24 @@ method render-page( %page --> Str ) {
 
     # make sure each page specifies a template (index, blog, etc.).
     if %page<template>:!exists {
-        my $msg = "Page {%page<url>} specifies no template";
+        my $msg = "Page «{%page<url>}» specifies no template in its YAML metadata.";
         $!log.warn($msg);
-        return '<p>' ~ $msg ~ '</p>';
+        return self!htmlify-message: $msg;
     }
 
     # make sure each page specifies only one template.
     unless %page<template>.elems == 1 and %page<template> ~~ Str {
-        my $msg = "Page {%page<url>} specifies more than a single template";
+        my $msg = "Page «{%page<url>}» specifies more than a single template";
         $!log.warn($msg);
-        return '<p>' ~ $msg ~ '</p>';
+        return self!htmlify-message: $msg;
     }
 
     # make sure template specified in a page exists.
     unless self.template-exist(%page<template>) {
     #if %!templates{ %page<template> }:!exists {
-        my $msg = "Template {%page<template>} in page doesn't exist in the {$!templates-dir} directory";
+        my $msg = "Template «{%page<template>}» in page doesn't exist in the «{$!templates-dir}» directory";
         $!log.warn($msg);
-        return '<p>' ~ $msg ~ '</p>';
+        return self!htmlify-message: $msg;
     }
 
     # template seems to exists so get a hold of it.
@@ -125,4 +125,38 @@ method !load-templates {
         $!log.warn("No such '$!templates-dir' directory");
         exit;
     }
+}
+
+method !htmlify-message( Str $msg ) {
+    qq:to/END/;
+    <head>
+    <style>
+    body \{
+        background: #161616;
+        font-size:  20px;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+    \}
+
+    .section \{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        margin: auto 0;
+        height: 100vh;
+        width: 50%;
+    \}
+    </style>
+    </head>
+
+    <body>
+        <div class="section">
+            <div><p>{$msg}</p></div>
+        </div>
+    </body>
+    END
 }

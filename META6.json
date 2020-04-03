@@ -6,7 +6,7 @@
     "authors" : [ "Luis F. Uceta", "Ivan Hinson" ],
     "description" : "A static site generator using Mustache templates.",
     "license" : "Artistic-2.0",
-    "source-url" : "https://github.com/hunter-classes/winter-2020-codefest-submissions-phoebe.git",
+    "source-url" : "https://github.com/uzluisf/raku-pear.git",
     "provides" : { 
         "pear" : "bin/pear",
         "Pear" : "lib/Pear.rakumod",

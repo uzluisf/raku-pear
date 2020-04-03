@@ -1,54 +1,77 @@
-# Hunter CS Winter 2019 CodeFest
+# Pear
 
-# Team Info
+Pear is a simple static site generator written in [Raku](https://raku.org/). It
+uses [Mustache](https://mustache.github.io/) for its templating.
 
-### Team name: Phoebe
+# Installation
 
-### Team members (format: GitHub username, last name, first name):
+From source:
 
-- [uzluisf](https://github.com/uzluisf/), Uceta, Luis
-- [ivan-hinson](https://github.com/ivan-hinson), Hinson, Ivan
+```
+$ git clone https://github.com/uzluisf/pear-raku.git
+$ cd pear-raku
+$ zef install .
+```
 
-### Project info
+# Getting started
 
-- [Project](./PROJECT.md)
-- [Installation](./INSTALL.md)
-- [Documentation and demo site](https://uzluisf.github.io/pear-doc/)
+After installing Pear, give the
+[quickstart](https://uzluisf.github.io/pear-doc/docs/quickstart/) and related
+pages a read. The source for the documentation (and demo) site can be found at
+https://github.com/uzluisf/pear-doc.
 
-### Group info (check all that apply - add an X in the [ ])
-- [ ] We are a CUNY2X bootcamp cohort team
-- [ ] We are a Daedalus / Google Mentored group
-- [ ] We are a beginner group (only completed CSCI 12700)
-- [ ] We plan to attend the final event on 1/31 at Google (time TBD)
-- As attendance is highly important, if you checked the above box but only some members will be attending, please indicate the number here: ___
+Alternatively, after cloning/downloading the repo you can follow the following
+command to generate the documentation site:
 
-# General Info
+```
+$ cd raku-pear/resources/pear-doc/
+$ pear render
+$ pear serve
+```
 
-## Theme: Create a Passion Project - Make something you've always wanted to build!
-Think of something you've always wanted to make and bring to life, and do it! To make it easier for our judges and to have some form of organization, all we ask is to try to keep it within one of these categories:
--   Productivity
--   Social Good
--   Education
-    
-Please incorporate it into your project, and we hope to see new, exciting, and innovative projects!
+These are the same source files at Github
+[uzluisf/pear-doc](https://github.com/uzluisf/pear-doc) so you might need to
+change the base-url in the config file to `/` (e.g., `base-url: "/"`) in order
+to serve the generated site locally.
 
-*__If you have any questions about an idea and whether it's within the scope, please ask us as soon as possible.__*
+# Requirements and dependencies
 
-## Rules & Instructions:
+First of all, the [Rakudo compiler](https://rakudo.org/) must be installed on
+the machine. As for dependencies, Pear depends directly on the following
+modules:
 
-1. Please edit the **Team Info** section of this file with your team's information.
-2. All projects must be completed by groups of 2-6 people from Hunter College.
-3. Submissions will be evaluated starting on **Monday, January 27 at 7:00am**.
-4. Projects must be able to be run by the organizers by the submission deadline.
-5. Please add a markdown formatted file named INSTALL.md with instructions on how to install and run your project. 
-6. Projects can be standalone programs, web applications, Android apps,  iOS apps, etc.
-7. **No hardware projects!** You may not use additional hardware other than what is on a typical laptop for a desktop / web application and a typical phone for a phone app.
-8. Good luck and have fun!
+* [`Template::Mustache`](https://github.com/softmoth/p6-Template-Mustache) for
+  parsing the Mustache templates.
 
-## Important dates:
+* [`Text::Markdown`](https://github.com/softmoth/p6-Template-Mustache) to
+  generate HTML from Markdown.
 
-- Start date: Monday, December 23rd, 2019
-- Submission deadline: Monday, January 27, 2020 at 7:00am
-- Final event date: Friday, January 31, 2020 (time TBD) at Google NYC (on the corner of 15th Street and 8th Ave in Manhattan, more details to follow)
+* [`YAMLish`](https://github.com/Leont/yamlish) for parsing the YAML
+  configuration file.
 
-If your team has any questions, problems, or concerns, please contact us at hunter.codefest@gmail.com.
+* [`Log`](https://github.com/whity/perl6-log) for logging messages while Pear is
+  running.
+
+* [`HTTP::Server::Tiny`](https://github.com/tokuhirom/p6-HTTP-Server-Tiny) for
+  the server functionality.
+
+If not installed, all these modules will be installed automatically by `zef`
+during the installation of Pear. They can all be found in the Raku ecosystem at
+[https://modules.raku.org/](https://modules.raku.org/)
+
+# See also
+
+* [Mustache](https://mustache.github.io/)
+
+* [YAML](https://yaml.org/)
+
+# Authors
+
+* [Luis F. Uceta](https://uzluisf.gitlab.io/)
+
+* Ivan Hinson, [Github](https://github.com/ivan-hinson)
+
+# License
+
+Pear is free software; you can redistribute it and/or modify it under the terms
+of the Artistic License 2.0. See the file LICENSE for details.
